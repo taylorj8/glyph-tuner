@@ -42,6 +42,7 @@ class GlyphSprite {
         val musicFrame = GlyphMatrixFrame.Builder()
             .addTop(musicIcon)
             .build(context)
+
         glyphMatrixManager?.setMatrixFrame(musicFrame.render())
     }
 }

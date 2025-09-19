@@ -14,16 +14,30 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import be.tarsos.dsp.AudioDispatcher
-import be.tarsos.dsp.AudioEvent
-import be.tarsos.dsp.io.android.AudioDispatcherFactory
-import be.tarsos.dsp.pitch.PitchDetectionHandler
-import be.tarsos.dsp.pitch.PitchDetectionResult
-import be.tarsos.dsp.pitch.PitchProcessor
 import com.nothing.ketchum.GlyphToy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 
 class GuitarTunerService : Service() {
+
+    private var backgroundScope: CoroutineScope? = null
+    private var glyphSprite: GlyphSprite? = null
+    private var audioProcessor: AudioProcessor? = null
+    private var running = false
+
+    private val notes = mapOf(
+        82.41f to R.mipmap.note_e,
+        110f to R.mipmap.note_a,
+        146.83f to R.mipmap.note_d,
+        196f to R.mipmap.note_g,
+        246.94f to R.mipmap.note_b,
+        329.63f to R.mipmap.note_e
+    )
 
     override fun onCreate() {
         super.onCreate()
@@ -39,14 +53,8 @@ class GuitarTunerService : Service() {
 
         startForeground(1, notification)
 
-        // Do your background work here (e.g., a thread, coroutine, or handler)
-
         return START_NOT_STICKY
     }
-
-//    private var glyphMatrixManager: GlyphMatrixManager? = null
-    private var glyphSprite: GlyphSprite? = null
-    private var audioProcessor: AudioProcessor? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d("test", "BIND")
@@ -55,18 +63,34 @@ class GuitarTunerService : Service() {
     }
 
     private fun startTuner() {
-        glyphSprite = GlyphSprite()
-        glyphSprite?.init(applicationContext)
-        audioProcessor = AudioProcessor()
-        audioProcessor?.start()
-        Handler(Looper.getMainLooper()).postDelayed({
-            glyphSprite?.render(R.mipmap.music_icon)
-        }, 1) // this delay fixes a crash don't question it
+        audioProcessor = AudioProcessor().apply {
+            start()
+        }
+        glyphSprite = GlyphSprite().apply {
+            init(applicationContext)
+            Handler(Looper.getMainLooper()).postDelayed({
+                render(R.mipmap.music_icon)
+            }, 10) // this delay fixes a crash don't question it
+        }
+        backgroundScope = CoroutineScope(Dispatchers.Main)
+
+        mainLoop()
 
         Handler(Looper.getMainLooper()).postDelayed({
             stopTuner()
             Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
         }, 30000) // stop automatically after 30s
+    }
+
+    private fun mainLoop() {
+        running = true
+        backgroundScope?.launch {
+            while(isActive) {
+                val closestNote = audioProcessor!!.getClosestNote()
+                glyphSprite!!.render(notes[closestNote]!!)
+                delay(100)
+            }
+        }
     }
 
 
@@ -75,6 +99,9 @@ class GuitarTunerService : Service() {
         audioProcessor = null
         glyphSprite?.unInit()
         glyphSprite = null
+        backgroundScope?.cancel()
+        backgroundScope = null
+        running = false
     }
 
     private val serviceHandler: Handler = object : Handler(Looper.getMainLooper()) {
