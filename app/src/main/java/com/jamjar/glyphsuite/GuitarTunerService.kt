@@ -25,16 +25,13 @@ import com.nothing.ketchum.GlyphToy
 
 class GuitarTunerService : Service() {
 
-    private val CHANNEL_ID = "ForegroundServiceChannel"
-    private var dispatcher: AudioDispatcher? = null
-
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notification: Notification = NotificationCompat.Builder(this, "ForegroundServiceChannel")
             .setContentTitle("Foreground Service")
             .setContentText("Service is running...")
             .setSmallIcon(R.drawable.ic_launcher_foreground) // replace with your icon
@@ -48,7 +45,8 @@ class GuitarTunerService : Service() {
     }
 
 //    private var glyphMatrixManager: GlyphMatrixManager? = null
-    private val glyphSprite = GlyphSprite()
+    private var glyphSprite: GlyphSprite? = null
+    private var audioProcessor: AudioProcessor? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d("test", "BIND")
@@ -57,19 +55,26 @@ class GuitarTunerService : Service() {
     }
 
     private fun startTuner() {
-        glyphSprite.init(applicationContext)
-        glyphSprite.render(R.mipmap.music_icon)
-        startAudioProcessing()
+        glyphSprite = GlyphSprite()
+        glyphSprite?.init(applicationContext)
+        audioProcessor = AudioProcessor()
+        audioProcessor?.start()
+        Handler(Looper.getMainLooper()).postDelayed({
+            glyphSprite?.render(R.mipmap.music_icon)
+        }, 1) // this delay fixes a crash don't question it
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            stopTuner()
+            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
+        }, 30000) // stop automatically after 30s
     }
 
 
     private fun stopTuner() {
-        // Stop audio processing first
-        dispatcher?.stop()
-        dispatcher = null
-
-        // Clean up Glyph Matrix
-        glyphSprite.unInit()
+        audioProcessor?.stop()
+        audioProcessor = null
+        glyphSprite?.unInit()
+        glyphSprite = null
     }
 
     private val serviceHandler: Handler = object : Handler(Looper.getMainLooper()) {
@@ -79,7 +84,10 @@ class GuitarTunerService : Service() {
                     val bundle: Bundle = msg.getData()
                     val event = bundle.getString(GlyphToy.MSG_GLYPH_TOY_DATA)
                     when (event) {
-                        GlyphToy.EVENT_ACTION_UP -> startTuner()
+                        GlyphToy.EVENT_ACTION_UP -> {
+                            startTuner()
+                            glyphSprite?.render(R.mipmap.music_icon)
+                        }
                         GlyphToy.EVENT_ACTION_DOWN -> stopTuner()
                     }
                 }
@@ -92,42 +100,12 @@ class GuitarTunerService : Service() {
 
     private fun createNotificationChannel() {
         val serviceChannel = NotificationChannel(
-            CHANNEL_ID,
+            "ForegroundServiceChannel",
             "Foreground Service Channel",
             NotificationManager.IMPORTANCE_LOW
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager?.createNotificationChannel(serviceChannel)
-    }
-
-    private fun startAudioProcessing() {
-        val sampleRate = 44100
-        val bufferSize = 2048
-        val overlap = 0
-
-        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(sampleRate, bufferSize, overlap)
-
-        val pdh = PitchDetectionHandler { res: PitchDetectionResult, _: AudioEvent ->
-            val pitchHz = res.pitch
-            if (pitchHz > 0) {
-                Log.d("GlyphToy", "Detected pitch: $pitchHz Hz")
-                // TODO: map pitch to guitar string and update GlyphMatrix
-            }
-        }
-
-        dispatcher?.addAudioProcessor(PitchProcessor(
-            PitchProcessor.PitchEstimationAlgorithm.YIN,
-            sampleRate.toFloat(),
-            bufferSize,
-            pdh
-        ))
-
-        Thread { dispatcher?.run() }.start()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            stopTuner()
-            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
-        }, 5000) // stop automatically after 30s
     }
 
 }
