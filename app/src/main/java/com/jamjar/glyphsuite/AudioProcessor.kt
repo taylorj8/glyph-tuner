@@ -13,7 +13,7 @@ class AudioProcessor {
 
     private var dispatcher: AudioDispatcher? = null
     private var pitchHz = 0f
-    private val pitchBuffer = ArrayDeque<Float>(5)
+    private var pitchBuffer: ArrayDeque<Float>? = null
     private val frequencies = listOf(
         82.41f,
         110f,
@@ -24,6 +24,7 @@ class AudioProcessor {
     )
 
     fun start() {
+        pitchBuffer = ArrayDeque(5)
         repeat(5) {
             enqueuePitch(82.41f) // todo better solution here
         }
@@ -58,7 +59,7 @@ class AudioProcessor {
     fun getClosestNote(): Float {
         var lowestDiff = Float.MAX_VALUE
         var closestNote = 82.41f
-        val averagedPitch = robustAverage(pitchBuffer)
+        val averagedPitch = robustAverage()
         frequencies.forEach { note ->
             val diff = abs(note - averagedPitch)
             if (diff < lowestDiff) {
@@ -69,10 +70,10 @@ class AudioProcessor {
         return closestNote
     }
 
-    private fun robustAverage(numbers: ArrayDeque<Float>, tolerance: Float = 3f): Float {
-        require(numbers.size == 5) { "List must contain exactly 5 numbers" }
+    fun robustAverage(tolerance: Float = 3f): Float {
+        require(pitchBuffer?.size == 5) { "List must contain exactly 5 numbers" }
 
-        val sorted = numbers.sorted()
+        val sorted = pitchBuffer!!.sorted()
         var bestWindow: List<Float> = emptyList()
 
         for (windowSize in 5 downTo 3) {
@@ -86,6 +87,10 @@ class AudioProcessor {
             if (bestWindow.isNotEmpty()) break
         }
 
+        if (bestWindow.average().toFloat().isNaN()) {
+            return 82.41f // todo just for testing
+        }
+
         return bestWindow.average().toFloat()
     }
 
@@ -95,9 +100,9 @@ class AudioProcessor {
     }
 
     private fun enqueuePitch(pitch: Float) {
-        if (pitchBuffer.size == 5) {
-            pitchBuffer.removeFirst()
+        if (pitchBuffer!!.size == 5) {
+            pitchBuffer!!.removeFirst()
         }
-        pitchBuffer.addLast(pitch)
+        pitchBuffer!!.addLast(pitch)
     }
 }

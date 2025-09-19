@@ -28,7 +28,7 @@ class GuitarTunerService : Service() {
     private var backgroundScope: CoroutineScope? = null
     private var glyphSprite: GlyphSprite? = null
     private var audioProcessor: AudioProcessor? = null
-    private var running = false
+    private var animationEngine: AnimationEngine? = null
 
     private val notes = mapOf(
         82.41f to R.mipmap.note_e,
@@ -73,22 +73,72 @@ class GuitarTunerService : Service() {
             }, 10) // this delay fixes a crash don't question it
         }
         backgroundScope = CoroutineScope(Dispatchers.Main)
+        animationEngine = AnimationEngine()
 
         mainLoop()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            stopTuner()
-            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
-        }, 30000) // stop automatically after 30s
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            stopTuner()
+//            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
+//        }, 30000) // stop automatically after 30s
     }
 
     private fun mainLoop() {
-        running = true
+//        backgroundScope?.launch {
+//            while(isActive) {
+//                val closestNote = audioProcessor!!.getClosestNote()
+//                glyphSprite!!.render(notes[closestNote]!!)
+//                delay(100)
+//            }
+//        }
         backgroundScope?.launch {
-            while(isActive) {
+            while (isActive) {
                 val closestNote = audioProcessor!!.getClosestNote()
-                glyphSprite!!.render(notes[closestNote]!!)
-                delay(100)
+                val currentFreq = audioProcessor!!.robustAverage()
+//                val array = animationEngine!!.generateTuningFrameForPitch(currentFreq.toDouble(), closestNote.toDouble())
+                val i = animationEngine!!.pitchToImageIndex(currentFreq, closestNote)
+
+                val frame = when (closestNote) {
+                    110f -> {
+                        if (currentFreq > closestNote) {
+                            listOf(R.drawable.a_intune, R.drawable.a_down4, R.drawable.a_down3, R.drawable.a_down2, R.drawable.a_down1, R.drawable.a_down0)[i]
+                        } else {
+                            listOf(R.drawable.a_intune, R.drawable.a_up4, R.drawable.a_up3, R.drawable.a_up2, R.drawable.a_up1, R.drawable.a_up0)[i]
+                        }
+                    }
+                    146.83f -> {
+                        if (currentFreq > closestNote) {
+                            listOf(R.drawable.d_intune, R.drawable.d_down4, R.drawable.d_down3, R.drawable.d_down2, R.drawable.d_down1, R.drawable.d_down0)[i]
+                        } else {
+                            listOf(R.drawable.d_intune, R.drawable.d_up4, R.drawable.d_up3, R.drawable.d_up2, R.drawable.d_up1, R.drawable.d_up0)[i]
+                        }
+                    }
+                    196f -> {
+                        if (currentFreq > closestNote) {
+                            listOf(R.drawable.g_intune, R.drawable.g_down4, R.drawable.g_down3, R.drawable.g_down2, R.drawable.g_down1, R.drawable.g_down0)[i]
+                        } else {
+                            listOf(R.drawable.g_intune, R.drawable.g_up4, R.drawable.g_up3, R.drawable.g_up2, R.drawable.g_up1, R.drawable.g_up0)[i]
+                        }
+                    }
+                    246.94f -> {
+                        if (currentFreq > closestNote) {
+                            listOf(R.drawable.b_intune, R.drawable.b_down4, R.drawable.b_down3, R.drawable.b_down2, R.drawable.b_down1, R.drawable.b_down0)[i]
+                        } else {
+                            listOf(R.drawable.b_intune, R.drawable.b_up4, R.drawable.b_up3, R.drawable.b_up2, R.drawable.b_up1, R.drawable.b_up0)[i]
+                        }
+                    }
+                    else -> {
+                        if (currentFreq > closestNote) {
+                            listOf(R.drawable.e_intune, R.drawable.e_down4, R.drawable.e_down3, R.drawable.e_down2, R.drawable.e_down1, R.drawable.e_down0)[i]
+                        } else {
+                            listOf(R.drawable.e_intune, R.drawable.e_up4, R.drawable.e_up3, R.drawable.e_up2, R.drawable.e_up1, R.drawable.e_up0)[i]
+                        }
+                    }
+                }
+
+
+                glyphSprite!!.render(frame)
+                delay(50)
             }
         }
     }
@@ -101,7 +151,7 @@ class GuitarTunerService : Service() {
         glyphSprite = null
         backgroundScope?.cancel()
         backgroundScope = null
-        running = false
+        animationEngine = null
     }
 
     private val serviceHandler: Handler = object : Handler(Looper.getMainLooper()) {

@@ -45,4 +45,7 @@ class GlyphSprite {
 
         glyphMatrixManager?.setMatrixFrame(musicFrame.render())
     }
+    fun render(array: IntArray) {
+        glyphMatrixManager?.setMatrixFrame(array)
+    }
 }
