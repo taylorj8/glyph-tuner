@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val serviceIntent = Intent(this, GuitarTunerService::class.java)
+        val serviceIntent = Intent(this, TunerForegroundService::class.java)
         startForegroundService(serviceIntent)
 
     }

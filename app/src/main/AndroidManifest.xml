@@ -31,8 +31,7 @@
 
         <service android:name="com.jamjar.glyphsuite.GuitarTunerService"
             android:permission="com.nothing.glyph.permission.BIND_GLYPH_TOY_SERVICE"
-            android:exported="true"
-            android:foregroundServiceType="microphone">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.nothing.glyph.TOY"/>
             </intent-filter>
@@ -42,6 +41,11 @@
             <meta-data android:name="com.nothing.glyph.toy.image"
                 android:resource="@drawable/ic_launcher_foreground"/>
         </service>
+
+        <service
+            android:name="com.jamjar.glyphsuite.TunerForegroundService"
+            android:foregroundServiceType="microphone"
+            android:exported="false" />
 
     </application>
 

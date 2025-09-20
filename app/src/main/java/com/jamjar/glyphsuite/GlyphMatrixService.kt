@@ -1,7 +1,5 @@
 package com.jamjar.glyphsuite
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
@@ -12,24 +10,11 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphToy
 
 abstract class GlyphMatrixService(private val tag: String) : Service() {
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        val notification = NotificationCompat.Builder(this, "my_service_channel")
-            .setContentTitle("My App is Running")
-            .setContentText("Foreground service active")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .build()
-
-        startForeground(1, notification)
-        return START_STICKY
-    }
 
     private val buttonPressedHandler = object : Handler(Looper.getMainLooper()) {
 
@@ -119,15 +104,4 @@ abstract class GlyphMatrixService(private val tag: String) : Service() {
         private val LOG_TAG = GlyphMatrixService::class.java.simpleName
         private const val KEY_DATA = "data"
     }
-
-    private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            "guitar_tuner_channel",
-            "Glyph Toy Channel",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
-    }
-
 }
