@@ -1,11 +1,16 @@
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import com.jamjar.glyphsuite.R
+import com.jamjar.glyphsuite.util.bitmapToIntArray
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
+import com.nothing.ketchum.GlyphToy
 
 class GlyphSprite {
 
@@ -30,9 +35,10 @@ class GlyphSprite {
     }
 
     fun unInit() {
-        this.glyphMatrixManager?.unInit()
-        this.glyphMatrixManager = null
-        this.context = null
+        glyphMatrixManager?.turnOff()
+        glyphMatrixManager?.unInit()
+        glyphMatrixManager = null
+        context = null
     }
 
     fun render(resourceId: Int) {
@@ -42,6 +48,8 @@ class GlyphSprite {
         val musicFrame = GlyphMatrixFrame.Builder()
             .addTop(musicIcon)
             .build(context)
+
+
 
         glyphMatrixManager?.setMatrixFrame(musicFrame.render())
     }

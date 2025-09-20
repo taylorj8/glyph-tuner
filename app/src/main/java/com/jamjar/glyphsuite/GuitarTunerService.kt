@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -14,6 +15,8 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.jamjar.glyphsuite.util.bitmapFromDrawable
+import com.jamjar.glyphsuite.util.bitmapToIntArray
 import com.nothing.ketchum.GlyphToy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,13 +87,6 @@ class GuitarTunerService : Service() {
     }
 
     private fun mainLoop() {
-//        backgroundScope?.launch {
-//            while(isActive) {
-//                val closestNote = audioProcessor!!.getClosestNote()
-//                glyphSprite!!.render(notes[closestNote]!!)
-//                delay(100)
-//            }
-//        }
         backgroundScope?.launch {
             while (isActive) {
                 val closestNote = audioProcessor!!.getClosestNote()
@@ -135,7 +131,6 @@ class GuitarTunerService : Service() {
                         }
                     }
                 }
-
 
                 glyphSprite!!.render(frame)
                 delay(50)

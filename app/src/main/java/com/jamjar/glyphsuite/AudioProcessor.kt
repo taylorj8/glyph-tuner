@@ -71,27 +71,32 @@ class AudioProcessor {
     }
 
     fun robustAverage(tolerance: Float = 3f): Float {
-        require(pitchBuffer?.size == 5) { "List must contain exactly 5 numbers" }
+        try { // todo - figure out cause of crash
+            require(pitchBuffer?.size == 5) { "List must contain exactly 5 numbers" }
 
-        val sorted = pitchBuffer!!.sorted()
-        var bestWindow: List<Float> = emptyList()
+            val sorted = pitchBuffer!!.sorted()
+            var bestWindow: List<Float> = emptyList()
 
-        for (windowSize in 5 downTo 3) {
-            for (start in 0..(sorted.size - windowSize)) {
-                val window = sorted.subList(start, start + windowSize)
-                if (window.last() - window.first() <= tolerance) {
-                    bestWindow = window
-                    break
+            for (windowSize in 5 downTo 3) {
+                for (start in 0..(sorted.size - windowSize)) {
+                    val window = sorted.subList(start, start + windowSize)
+                    if (window.last() - window.first() <= tolerance) {
+                        bestWindow = window
+                        break
+                    }
                 }
+                if (bestWindow.isNotEmpty()) break
             }
-            if (bestWindow.isNotEmpty()) break
-        }
 
-        if (bestWindow.average().toFloat().isNaN()) {
-            return 82.41f // todo just for testing
-        }
+            if (bestWindow.average().toFloat().isNaN()) {
+                return 82.41f // todo just for testing
+            }
 
-        return bestWindow.average().toFloat()
+            return bestWindow.average().toFloat()
+        } catch (e: Exception) {
+            e.message?.let { Log.d("crash", it) }
+            return 82.41f
+        }
     }
 
     fun stop() {
