@@ -1,9 +1,7 @@
 package com.jamjar.glyphsuite
 
-import android.util.Log
 import be.tarsos.dsp.AudioEvent
 import be.tarsos.dsp.AudioProcessor
-import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchDetectionHandler
 import java.util.*
 import kotlin.math.abs
@@ -28,7 +26,6 @@ class MedianPitchProcessor(private val windowSize: Int = 10) : AudioProcessor {
     fun getMedianPitch(): Float {
         val sortedPitches = pitchQueue.sorted()
         val medianPitch = sortedPitches[pitchQueue.size / 2]
-        Log.d("pitch", correctHarmonicError(medianPitch).toString())
         return correctHarmonicError(medianPitch)
     }
 

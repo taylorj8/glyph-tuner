@@ -21,7 +21,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -32,21 +31,9 @@ class GuitarTunerService : Service() {
     private var glyphSprite: GlyphSprite? = null
     private var audioProcessor: AudioProcessor? = null
 
-    private val notes = mapOf(
-        82.41f to R.mipmap.note_e,
-        110f to R.mipmap.note_a,
-        146.83f to R.mipmap.note_d,
-        196f to R.mipmap.note_g,
-        246.94f to R.mipmap.note_b,
-        329.63f to R.mipmap.note_e
-    )
-
-    override fun onCreate() {
-        super.onCreate()
-        createNotificationChannel()
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("test", "START")
+        createNotificationChannel()
         val notification: Notification = NotificationCompat.Builder(this, "ForegroundServiceChannel")
             .setContentTitle("Foreground Service")
             .setContentText("Service is running...")
@@ -55,7 +42,7 @@ class GuitarTunerService : Service() {
 
         startForeground(1, notification)
 
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -64,24 +51,23 @@ class GuitarTunerService : Service() {
         return serviceMessenger.binder
     }
 
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d("test", "UNBIND")
+        stopTuner()
+        return false
+    }
+
     private fun startTuner() {
+        Log.d("test", "TUNER STARTING")
         audioProcessor = AudioProcessor().apply {
             start()
         }
         glyphSprite = GlyphSprite().apply {
             init(applicationContext)
-            Handler(Looper.getMainLooper()).postDelayed({
-                render(R.mipmap.music_icon)
-            }, 10) // this delay fixes a crash don't question it
         }
         backgroundScope = CoroutineScope(Dispatchers.Main)
 
         mainLoop()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            stopTuner()
-            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
-        }, 120000) // stop automatically after 2m
     }
 
     private fun mainLoop() {
@@ -106,8 +92,8 @@ class GuitarTunerService : Service() {
         }
     }
 
-
     private fun stopTuner() {
+        Log.d("test", "TUNER STOPPING")
         audioProcessor?.stop()
         audioProcessor = null
         glyphSprite?.unInit()
@@ -124,10 +110,13 @@ class GuitarTunerService : Service() {
                     val event = bundle.getString(GlyphToy.MSG_GLYPH_TOY_DATA)
                     when (event) {
                         GlyphToy.EVENT_ACTION_UP -> {
+                            Log.d("test", "ACTION UP")
                             startTuner()
-                            glyphSprite?.render(R.mipmap.music_icon)
                         }
-                        GlyphToy.EVENT_ACTION_DOWN -> stopTuner()
+                        GlyphToy.EVENT_ACTION_DOWN -> {
+                            Log.d("test", "ACTION DOWN")
+                            stopTuner()
+                        }
                     }
                 }
 
