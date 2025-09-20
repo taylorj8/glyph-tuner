@@ -114,14 +114,22 @@ class AnimationEngine {
         return grid
     }
 
-    fun pitchToImageIndex(currentHz: Float, targetHz: Float, imageCount: Int = 6, maxCents: Float = 50.0f): Int {
-        if (currentHz <= 0.0 || targetHz <= 0.0) return imageCount - 1 // optionally show "no-signal" image (last)
+    fun pitchToOffset(
+        currentHz: Float,
+        targetHz: Float,
+        maxCents: Float = 50.0f,
+        maxOffset: Int = 12
+    ): Int {
+        if (currentHz <= 0.0 || targetHz <= 0.0) return 0 // treat no signal as neutral
+
+        // Difference in cents (positive if sharp, negative if flat)
         val cents = 1200.0 * (ln(currentHz / targetHz) / ln(2.0))
-        val magnitude = abs(cents)
-        val normalized = (magnitude / maxCents).coerceIn(0.0, 1.0)
-        // Multiply by imageCount and floor; clamp to last index if normalized == 1
-        val idx = min((normalized * imageCount).toInt(), imageCount - 1)
-        return idx // 0 = in tune, 5 = very out of tune (with defaults)
+
+        // Normalize to -1.0..+1.0, then scale to offset range
+        val normalized = (cents / maxCents).coerceIn(-1.0, 1.0)
+        val offset = (normalized * maxOffset).roundToInt()
+
+        return offset
     }
 
     private companion object {

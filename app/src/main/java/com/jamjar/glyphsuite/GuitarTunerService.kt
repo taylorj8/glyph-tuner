@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -15,8 +14,6 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.jamjar.glyphsuite.util.bitmapFromDrawable
-import com.jamjar.glyphsuite.util.bitmapToIntArray
 import com.nothing.ketchum.GlyphToy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +21,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.ln
+import kotlin.math.roundToInt
 
 
 class GuitarTunerService : Service() {
@@ -92,47 +91,17 @@ class GuitarTunerService : Service() {
                 val closestNote = audioProcessor!!.getClosestNote()
                 val currentFreq = audioProcessor!!.robustAverage()
 //                val array = animationEngine!!.generateTuningFrameForPitch(currentFreq.toDouble(), closestNote.toDouble())
-                val i = animationEngine!!.pitchToImageIndex(currentFreq, closestNote)
+                val offset = animationEngine!!.pitchToOffset(currentFreq, closestNote)
 
-                val frame = when (closestNote) {
-                    110f -> {
-                        if (currentFreq > closestNote) {
-                            listOf(R.drawable.a_intune, R.drawable.a_down4, R.drawable.a_down3, R.drawable.a_down2, R.drawable.a_down1, R.drawable.a_down0)[i]
-                        } else {
-                            listOf(R.drawable.a_intune, R.drawable.a_up4, R.drawable.a_up3, R.drawable.a_up2, R.drawable.a_up1, R.drawable.a_up0)[i]
-                        }
-                    }
-                    146.83f -> {
-                        if (currentFreq > closestNote) {
-                            listOf(R.drawable.d_intune, R.drawable.d_down4, R.drawable.d_down3, R.drawable.d_down2, R.drawable.d_down1, R.drawable.d_down0)[i]
-                        } else {
-                            listOf(R.drawable.d_intune, R.drawable.d_up4, R.drawable.d_up3, R.drawable.d_up2, R.drawable.d_up1, R.drawable.d_up0)[i]
-                        }
-                    }
-                    196f -> {
-                        if (currentFreq > closestNote) {
-                            listOf(R.drawable.g_intune, R.drawable.g_down4, R.drawable.g_down3, R.drawable.g_down2, R.drawable.g_down1, R.drawable.g_down0)[i]
-                        } else {
-                            listOf(R.drawable.g_intune, R.drawable.g_up4, R.drawable.g_up3, R.drawable.g_up2, R.drawable.g_up1, R.drawable.g_up0)[i]
-                        }
-                    }
-                    246.94f -> {
-                        if (currentFreq > closestNote) {
-                            listOf(R.drawable.b_intune, R.drawable.b_down4, R.drawable.b_down3, R.drawable.b_down2, R.drawable.b_down1, R.drawable.b_down0)[i]
-                        } else {
-                            listOf(R.drawable.b_intune, R.drawable.b_up4, R.drawable.b_up3, R.drawable.b_up2, R.drawable.b_up1, R.drawable.b_up0)[i]
-                        }
-                    }
-                    else -> {
-                        if (currentFreq > closestNote) {
-                            listOf(R.drawable.e_intune, R.drawable.e_down4, R.drawable.e_down3, R.drawable.e_down2, R.drawable.e_down1, R.drawable.e_down0)[i]
-                        } else {
-                            listOf(R.drawable.e_intune, R.drawable.e_up4, R.drawable.e_up3, R.drawable.e_up2, R.drawable.e_up1, R.drawable.e_up0)[i]
-                        }
-                    }
+                val noteRes = when (closestNote) {
+                    110f -> R.drawable.overlay_a
+                    146.83f -> R.drawable.overlay_d
+                    196f -> R.drawable.overlay_g
+                    246.94f -> R.drawable.overlay_b
+                    else -> R.drawable.overlay_e
                 }
 
-                glyphSprite!!.render(frame)
+                glyphSprite!!.renderTuner(R.drawable.background, noteRes, offset)
                 delay(50)
             }
         }
@@ -178,6 +147,24 @@ class GuitarTunerService : Service() {
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager?.createNotificationChannel(serviceChannel)
+    }
+
+    fun pitchToOffset(
+        currentHz: Float,
+        targetHz: Float,
+        maxCents: Float = 50.0f,
+        maxOffset: Int = 12
+    ): Int {
+        if (currentHz <= 0.0 || targetHz <= 0.0) return 0 // treat no signal as neutral
+
+        // Difference in cents (positive if sharp, negative if flat)
+        val cents = 1200.0 * (ln(currentHz / targetHz) / ln(2.0))
+
+        // Normalize to -1.0..+1.0, then scale to offset range
+        val normalized = (cents / maxCents).coerceIn(-1.0, 1.0)
+        val offset = (normalized * maxOffset).roundToInt()
+
+        return offset
     }
 
 }

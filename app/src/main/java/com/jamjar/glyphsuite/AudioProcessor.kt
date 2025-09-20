@@ -24,8 +24,8 @@ class AudioProcessor {
     )
 
     fun start() {
-        pitchBuffer = ArrayDeque(5)
-        repeat(5) {
+        pitchBuffer = ArrayDeque(10)
+        repeat(10) {
             enqueuePitch(82.41f) // todo better solution here
         }
 
@@ -70,14 +70,14 @@ class AudioProcessor {
         return closestNote
     }
 
-    fun robustAverage(tolerance: Float = 3f): Float {
+    fun robustAverage(bufferSize: Int = 10, tolerance: Float = 3f): Float {
         try { // todo - figure out cause of crash
-            require(pitchBuffer?.size == 5) { "List must contain exactly 5 numbers" }
+            require(pitchBuffer?.size == bufferSize) { "List must contain exactly 5 numbers" }
 
             val sorted = pitchBuffer!!.sorted()
             var bestWindow: List<Float> = emptyList()
 
-            for (windowSize in 5 downTo 3) {
+            for (windowSize in bufferSize downTo bufferSize-4) {
                 for (start in 0..(sorted.size - windowSize)) {
                     val window = sorted.subList(start, start + windowSize)
                     if (window.last() - window.first() <= tolerance) {
@@ -105,7 +105,7 @@ class AudioProcessor {
     }
 
     private fun enqueuePitch(pitch: Float) {
-        if (pitchBuffer!!.size == 5) {
+        if (pitchBuffer!!.size == 10) {
             pitchBuffer!!.removeFirst()
         }
         pitchBuffer!!.addLast(pitch)
