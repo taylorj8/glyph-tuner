@@ -30,7 +30,6 @@ class GuitarTunerService : Service() {
     private var backgroundScope: CoroutineScope? = null
     private var glyphSprite: GlyphSprite? = null
     private var audioProcessor: AudioProcessor? = null
-    private var animationEngine: AnimationEngine? = null
 
     private val notes = mapOf(
         82.41f to R.mipmap.note_e,
@@ -75,7 +74,6 @@ class GuitarTunerService : Service() {
             }, 10) // this delay fixes a crash don't question it
         }
         backgroundScope = CoroutineScope(Dispatchers.Main)
-        animationEngine = AnimationEngine()
 
         mainLoop()
 
@@ -88,10 +86,9 @@ class GuitarTunerService : Service() {
     private fun mainLoop() {
         backgroundScope?.launch {
             while (isActive) {
+                val currentFreq = audioProcessor!!.getCurrentPitch()
                 val closestNote = audioProcessor!!.getClosestNote()
-                val currentFreq = audioProcessor!!.robustAverage()
-//                val array = animationEngine!!.generateTuningFrameForPitch(currentFreq.toDouble(), closestNote.toDouble())
-                val offset = animationEngine!!.pitchToOffset(currentFreq, closestNote)
+                val offset = pitchToOffset(currentFreq, closestNote)
 
                 val noteRes = when (closestNote) {
                     110f -> R.drawable.overlay_a
@@ -115,7 +112,6 @@ class GuitarTunerService : Service() {
         glyphSprite = null
         backgroundScope?.cancel()
         backgroundScope = null
-        animationEngine = null
     }
 
     private val serviceHandler: Handler = object : Handler(Looper.getMainLooper()) {
@@ -149,7 +145,7 @@ class GuitarTunerService : Service() {
         manager?.createNotificationChannel(serviceChannel)
     }
 
-    fun pitchToOffset(
+    private fun pitchToOffset(
         currentHz: Float,
         targetHz: Float,
         maxCents: Float = 50.0f,
