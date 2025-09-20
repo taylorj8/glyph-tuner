@@ -47,19 +47,38 @@ class GlyphSprite {
         glyphMatrixManager?.setMatrixFrame(frame.render())
     }
 
-    fun renderTuner(backgroundRes: Int, noteRes: Int, tuningOffset: Int) {
+    fun renderTuner(backgroundRes: Int, noteRes: Int, cents: Int, tuningOffset: Int) {
+        val centsString = cents.coerceIn(-99, 99).toString()
+
+        var textOffset = when (centsString.length) {
+            1 -> 10
+            2 -> 7
+            else -> 5
+        }
+        if (cents >= 10) textOffset += 1
+
         val background = GlyphMatrixObject.Builder()
             .setImageSource(BitmapFactory.decodeResource(context?.resources, backgroundRes))
             .build()
         val note = GlyphMatrixObject.Builder()
             .setImageSource(BitmapFactory.decodeResource(context?.resources, noteRes))
             .build()
+        val centsObj = GlyphMatrixObject.Builder()
+            .setText(centsString)
+            .setScale(50)
+            .setPosition(textOffset, 1)
+            .build()
 
         val tuningLine = generateTuningLine(tuningOffset)
 
-        val frame = GlyphMatrixFrame.Builder()
+        val backgroundFrame = GlyphMatrixFrame.Builder()
             .addLow(background)
             .addMid(note)
+            .build(context)
+
+        val frame = GlyphMatrixFrame.Builder()
+            .addLow(backgroundFrame.render())
+            .addMid(centsObj)
             .addTop(tuningLine)
             .build(context)
 

@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.roundToInt
 
@@ -77,10 +78,10 @@ class GuitarTunerService : Service() {
 
         mainLoop()
 
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            stopTuner()
-//            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
-//        }, 30000) // stop automatically after 30s
+        Handler(Looper.getMainLooper()).postDelayed({
+            stopTuner()
+            Log.d("GlyphToy", "Audio processing stopped automatically after 30 seconds")
+        }, 120000) // stop automatically after 2m
     }
 
     private fun mainLoop() {
@@ -88,7 +89,8 @@ class GuitarTunerService : Service() {
             while (isActive) {
                 val currentFreq = audioProcessor!!.getCurrentPitch()
                 val closestNote = audioProcessor!!.getClosestNote()
-                val offset = pitchToOffset(currentFreq, closestNote)
+                val cents = pitchDifferenceInCents(currentFreq, closestNote)
+                val offset = centsToOffset(cents)
 
                 val noteRes = when (closestNote) {
                     110f -> R.drawable.overlay_a
@@ -98,7 +100,7 @@ class GuitarTunerService : Service() {
                     else -> R.drawable.overlay_e
                 }
 
-                glyphSprite!!.renderTuner(R.drawable.background, noteRes, offset)
+                glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents.roundToInt(), offset)
                 delay(50)
             }
         }
@@ -145,22 +147,13 @@ class GuitarTunerService : Service() {
         manager?.createNotificationChannel(serviceChannel)
     }
 
-    private fun pitchToOffset(
-        currentHz: Float,
-        targetHz: Float,
-        maxCents: Float = 50.0f,
-        maxOffset: Int = 12
-    ): Int {
-        if (currentHz <= 0.0 || targetHz <= 0.0) return 0 // treat no signal as neutral
-
-        // Difference in cents (positive if sharp, negative if flat)
-        val cents = 1200.0 * (ln(currentHz / targetHz) / ln(2.0))
-
-        // Normalize to -1.0..+1.0, then scale to offset range
-        val normalized = (cents / maxCents).coerceIn(-1.0, 1.0)
-        val offset = (normalized * maxOffset).roundToInt()
-
-        return offset
+    private fun pitchDifferenceInCents(currentHz: Float, targetHz: Float): Float {
+        if (currentHz <= 0.0 || targetHz <= 0.0) return 0.0f // treat no signal as neutral
+        return (1200.0 * (ln(currentHz / targetHz) / ln(2.0))).toFloat()
     }
 
+    private fun centsToOffset(cents: Float, maxCents: Float = 50.0f, maxOffset: Int = 12): Int {
+        val normalized = (cents / maxCents).coerceIn(-1.0f, 1.0f)
+        return (normalized * maxOffset).roundToInt()
+    }
 }
