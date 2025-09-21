@@ -16,41 +16,23 @@ import kotlin.math.ln
 import kotlin.math.roundToInt
 
 
-class GuitarTunerService : Service() {
+class GuitarTuner : Service() {
 
     private var backgroundScope: CoroutineScope? = null
     private var glyphSprite: GlyphSprite? = null
     private var audioProcessor: AudioProcessor? = null
 
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        Log.d("test", "START")
-//        createNotificationChannel()
-//        val notification: Notification = NotificationCompat.Builder(this, "ForegroundServiceChannel")
-//            .setContentTitle("Foreground Service")
-//            .setContentText("Service is running...")
-//            .setSmallIcon(R.drawable.ic_launcher_foreground) // replace with your icon
-//            .build()
-//
-//        startForeground(1, notification)
-//
-//
-//        return START_STICKY
-//    }
-
     override fun onBind(intent: Intent?): IBinder {
-        Log.d("test", "BIND")
         startTuner()
         return Binder()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.d("test", "UNBIND")
         stopTuner()
         return false
     }
 
     private fun startTuner() {
-        Log.d("test", "TUNER STARTING")
         audioProcessor = AudioProcessor().apply {
             start()
         }
@@ -60,6 +42,16 @@ class GuitarTunerService : Service() {
         backgroundScope = CoroutineScope(Dispatchers.Main)
 
         mainLoop()
+    }
+
+    private fun stopTuner() {
+        Log.d("test", "TUNER STOPPING")
+        audioProcessor?.stop()
+        audioProcessor = null
+        glyphSprite?.unInit()
+        glyphSprite = null
+        backgroundScope?.cancel()
+        backgroundScope = null
     }
 
     private fun mainLoop() {
@@ -78,20 +70,10 @@ class GuitarTunerService : Service() {
                     else -> R.drawable.overlay_e
                 }
 
-                glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents.roundToInt(), offset)
+                glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents, offset)
                 delay(50)
             }
         }
-    }
-
-    private fun stopTuner() {
-        Log.d("test", "TUNER STOPPING")
-        audioProcessor?.stop()
-        audioProcessor = null
-        glyphSprite?.unInit()
-        glyphSprite = null
-        backgroundScope?.cancel()
-        backgroundScope = null
     }
 
     private fun pitchDifferenceInCents(currentHz: Float, targetHz: Float): Float {

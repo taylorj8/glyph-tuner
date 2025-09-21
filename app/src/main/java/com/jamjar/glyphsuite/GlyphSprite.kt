@@ -6,6 +6,7 @@ import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
+import kotlin.math.roundToInt
 
 class GlyphSprite {
 
@@ -36,7 +37,7 @@ class GlyphSprite {
         context = null
     }
 
-    fun render(resourceId: Int) {
+    fun renderResource(resourceId: Int) {
         val icon = GlyphMatrixObject.Builder()
             .setImageSource(BitmapFactory.decodeResource(context?.resources, resourceId))
             .build()
@@ -47,8 +48,8 @@ class GlyphSprite {
         glyphMatrixManager?.setMatrixFrame(frame.render())
     }
 
-    fun renderTuner(backgroundRes: Int, noteRes: Int, cents: Int, tuningOffset: Int) {
-        val centsString = cents.coerceIn(-99, 99).toString()
+    fun renderTuner(backgroundRes: Int, noteRes: Int, cents: Float, tuningOffset: Int) {
+        val centsString = cents.roundToInt().coerceIn(-99, 99).toString()
 
         var textOffset = when (centsString.length) {
             1 -> 10
@@ -87,14 +88,9 @@ class GlyphSprite {
 
     private fun generateTuningLine(offset: Int): IntArray {
         val grid = IntArray(WIDTH * HEIGHT) { 0 }
-
-        // Clamp offset to valid range (-12..+12)
         val clampedOffset = offset.coerceIn(-MID_POINT, MID_POINT)
-
-        // Column where the line should be drawn
         val col = MID_POINT + clampedOffset
 
-        // Vertical line of length 9, centered vertically
         val lineLength = 9
         val startRow = MID_POINT - lineLength / 2
         val endRow = startRow + lineLength

@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.jamjar.glyphsuite.GuitarTunerService"
+        <service android:name="com.jamjar.glyphsuite.GuitarTuner"
             android:permission="com.nothing.glyph.permission.BIND_GLYPH_TOY_SERVICE"
             android:exported="true">
             <intent-filter>
