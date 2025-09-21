@@ -14,7 +14,7 @@ class TunerForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
-        val notification = NotificationCompat.Builder(this, "AudioChannel")
+        val notification = NotificationCompat.Builder(this, "ForegroundChannel")
             .setContentTitle("Glyph Tuner")
             .setContentText("Mic is not accessed unless Glyph Toy is active.")
             .setSmallIcon(R.drawable.small_guitar_icon)
@@ -25,7 +25,7 @@ class TunerForegroundService : Service() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            "AudioChannel",
+            "ForegroundChannel",
             "Foreground Service Channel",
             NotificationManager.IMPORTANCE_LOW
         )
