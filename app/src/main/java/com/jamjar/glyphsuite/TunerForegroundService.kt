@@ -15,9 +15,9 @@ class TunerForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, "AudioChannel")
-            .setContentTitle("Glyph Suite")
-            .setContentText("Glyph Suite is running")
-            .setSmallIcon(R.drawable.guitar_tuner_icon)
+            .setContentTitle("Glyph Tuner")
+            .setContentText("Mic is not accessed unless Glyph Toy is active.")
+            .setSmallIcon(R.drawable.small_guitar_icon)
             .build()
         startForeground(1, notification)
         return START_STICKY
