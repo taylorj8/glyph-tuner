@@ -124,7 +124,6 @@ fun MainScreen() {
                         Text(
                             text = rationaleText,
                             color = MaterialTheme.colorScheme.error,
-//                            textAlign = TextAlign.Center,
                             modifier = Modifier.padding(16.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
