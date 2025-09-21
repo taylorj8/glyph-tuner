@@ -53,6 +53,7 @@ dependencies {
     implementation(files("libs/glyph-matrix-sdk-1.0.aar"))
     implementation(files("libs/TarsosDSPKit-release.aar"))
     implementation(libs.commons.math3)
+    implementation(libs.accompanist.permissions)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
