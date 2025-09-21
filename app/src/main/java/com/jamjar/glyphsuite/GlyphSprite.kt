@@ -2,6 +2,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.jamjar.glyphsuite.R
+import com.jamjar.glyphsuite.util.TuningMode
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
@@ -48,7 +50,7 @@ class GlyphSprite {
         glyphMatrixManager?.setMatrixFrame(frame.render())
     }
 
-    fun renderTuner(backgroundRes: Int, noteRes: Int, cents: Float, tuningOffset: Int) {
+    fun renderTuner(backgroundRes: Int, noteRes: Int, cents: Float, tuningOffset: Int, tuningMode: TuningMode) {
         val centsString = cents.roundToInt().coerceIn(-99, 99).toString()
 
         var textOffset = when (centsString.length) {
@@ -71,10 +73,19 @@ class GlyphSprite {
             .build()
 
         val tuningLine = generateTuningLine(tuningOffset)
+        val tuningLock = GlyphMatrixObject.Builder()
+            .setImageSource(BitmapFactory.decodeResource(context?.resources, if (tuningMode == TuningMode.AUTO) {
+                R.drawable.empty_frame
+            } else {
+                R.drawable.tuning_lock
+            }))
+            .build()
+
 
         val backgroundFrame = GlyphMatrixFrame.Builder()
             .addLow(background)
-            .addMid(note)
+            .addMid(tuningLock)
+            .addTop(note)
             .build(context)
 
         val frame = GlyphMatrixFrame.Builder()

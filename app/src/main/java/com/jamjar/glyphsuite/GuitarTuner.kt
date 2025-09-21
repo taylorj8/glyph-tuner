@@ -3,9 +3,15 @@ package com.jamjar.glyphsuite
 import GlyphSprite
 import android.app.Service
 import android.content.Intent
-import android.os.Binder
+import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.Message
+import android.os.Messenger
 import android.util.Log
+import com.jamjar.glyphsuite.util.TuningMode
+import com.nothing.ketchum.GlyphToy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -21,10 +27,11 @@ class GuitarTuner : Service() {
     private var backgroundScope: CoroutineScope? = null
     private var glyphSprite: GlyphSprite? = null
     private var audioProcessor: AudioProcessor? = null
+    private var tuningMode: TuningMode = TuningMode.AUTO
 
     override fun onBind(intent: Intent?): IBinder {
         startTuner()
-        return Binder()
+        return serviceMessenger.binder
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -58,11 +65,16 @@ class GuitarTuner : Service() {
         backgroundScope?.launch {
             while (isActive) {
                 val currentFreq = audioProcessor!!.getCurrentPitch()
-                val closestNote = audioProcessor!!.getClosestNote()
-                val cents = pitchDifferenceInCents(currentFreq, closestNote)
+
+                val targetNote = when (tuningMode) {
+                    TuningMode.AUTO -> audioProcessor!!.getClosestNote()
+                    else -> tuningMode.hz!!
+                }
+
+                val cents = pitchDifferenceInCents(currentFreq, targetNote)
                 val offset = centsToOffset(cents)
 
-                val noteRes = when (closestNote) {
+                val noteRes = when (targetNote) {
                     110f -> R.drawable.overlay_a
                     146.83f -> R.drawable.overlay_d
                     196f -> R.drawable.overlay_g
@@ -70,11 +82,28 @@ class GuitarTuner : Service() {
                     else -> R.drawable.overlay_e
                 }
 
-                glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents, offset)
+                glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents, offset, tuningMode)
                 delay(50)
             }
         }
     }
+
+    private val serviceHandler: Handler = object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                GlyphToy.MSG_GLYPH_TOY -> {
+                    val bundle: Bundle = msg.getData()
+                    val event = bundle.getString(GlyphToy.MSG_GLYPH_TOY_DATA)
+                    when (event) {
+                        GlyphToy.EVENT_CHANGE -> tuningMode = tuningMode.next()
+                    }
+                }
+
+                else -> super.handleMessage(msg)
+            }
+        }
+    }
+    private val serviceMessenger: Messenger = Messenger(serviceHandler)
 
     private fun pitchDifferenceInCents(currentHz: Float, targetHz: Float): Float {
         if (currentHz <= 0.0 || targetHz <= 0.0) return 0.0f // treat no signal as neutral
