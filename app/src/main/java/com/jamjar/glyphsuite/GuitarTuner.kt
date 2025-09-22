@@ -77,11 +77,12 @@ class GuitarTuner : Service() {
                 val offset = centsToOffset(cents)
 
                 val noteRes = when (targetNote) {
+                    82.41f -> R.drawable.overlay_elow
                     110f -> R.drawable.overlay_a
                     146.83f -> R.drawable.overlay_d
                     196f -> R.drawable.overlay_g
                     246.94f -> R.drawable.overlay_b
-                    else -> R.drawable.overlay_e
+                    else -> R.drawable.overlay_ehigh
                 }
 
                 glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents, offset, tuningMode)

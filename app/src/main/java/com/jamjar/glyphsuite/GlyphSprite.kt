@@ -68,6 +68,7 @@ class GlyphSprite {
             .build()
         val centsObj = GlyphMatrixObject.Builder()
             .setText(centsString)
+            .setBrightness(220)
             .setScale(50)
             .setPosition(textOffset, 1)
             .build()
