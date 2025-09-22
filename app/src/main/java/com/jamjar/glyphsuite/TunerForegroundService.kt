@@ -16,7 +16,7 @@ class TunerForegroundService : Service() {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, "ForegroundChannel")
             .setContentTitle("Glyph Tuner")
-            .setContentText("Mic is not accessed unless Glyph Toy is active.")
+            .setContentText("The mic is only accessed when the Glyph Toy is active.")
             .setSmallIcon(R.drawable.small_guitar_icon)
             .build()
         startForeground(1, notification)

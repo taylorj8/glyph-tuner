@@ -26,7 +26,7 @@ class GuitarTuner : Service() {
 
     private var backgroundScope: CoroutineScope? = null
     private var glyphSprite: GlyphSprite? = null
-    private var audioProcessor: AudioProcessor? = null
+    private var audioProcessor: GlyphAudioProcessor? = null
     private var tuningMode: TuningMode = TuningMode.AUTO
 
     override fun onBind(intent: Intent?): IBinder {
@@ -40,7 +40,7 @@ class GuitarTuner : Service() {
     }
 
     private fun startTuner() {
-        audioProcessor = AudioProcessor().apply {
+        audioProcessor = GlyphAudioProcessor().apply {
             start()
         }
         glyphSprite = GlyphSprite().apply {
@@ -66,6 +66,8 @@ class GuitarTuner : Service() {
             while (isActive) {
                 val currentFreq = audioProcessor!!.getCurrentPitch()
 
+                Log.d("", currentFreq.toString())
+
                 val targetNote = when (tuningMode) {
                     TuningMode.AUTO -> audioProcessor!!.getClosestNote()
                     else -> tuningMode.hz!!
@@ -83,7 +85,7 @@ class GuitarTuner : Service() {
                 }
 
                 glyphSprite!!.renderTuner(R.drawable.background, noteRes, cents, offset, tuningMode)
-                delay(50)
+                delay(30)
             }
         }
     }
@@ -92,7 +94,7 @@ class GuitarTuner : Service() {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 GlyphToy.MSG_GLYPH_TOY -> {
-                    val bundle: Bundle = msg.getData()
+                    val bundle: Bundle = msg.data
                     val event = bundle.getString(GlyphToy.MSG_GLYPH_TOY_DATA)
                     when (event) {
                         GlyphToy.EVENT_CHANGE -> tuningMode = tuningMode.next()
