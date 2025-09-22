@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startForegroundService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -102,15 +103,16 @@ fun MainScreen() {
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge
                     )
+                    launchForegroundService(context)
                 }
                 showSettingsLink -> {
                     val deniedPermissions = multiplePermissionsState.revokedPermissions
                     val rationaleText = buildString {
                         if (deniedPermissions.any { it.permission == Manifest.permission.RECORD_AUDIO }) {
-                            append("Audio Recording: Required to detect your guitar's pitch.\n\n")
+                            append("Audio Recording: Required to detect your guitar's pitch.\n")
                         }
                         if (deniedPermissions.any { it.permission == Manifest.permission.POST_NOTIFICATIONS }) {
-                            append("Post Notifications: Required to allow access to the microphone while using the Glyph.\n\n")
+                            append("Post Notifications: Required to allow access to the microphone while using the Glyph.\n")
                         }
                         append("You can enable the missing permissions from app settings.")
                     }
@@ -129,7 +131,7 @@ fun MainScreen() {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             modifier = Modifier
-                                .padding(8.dp)
+                                .padding(0.dp, 0.dp, 12.dp, 12.dp)
                                 .align(Alignment.End),
                             onClick = { openAppSettings(context) },
                         ) {
@@ -143,10 +145,6 @@ fun MainScreen() {
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { multiplePermissionsState.launchMultiplePermissionRequest() }) {
-                        Text("Request Permissions Again")
-                    }
                 }
             }
             Column(
@@ -164,6 +162,12 @@ fun MainScreen() {
         }
     }
 }
+
+fun launchForegroundService(context: Context) {
+    val serviceIntent = Intent(context, TunerForegroundService::class.java)
+    startForegroundService(context, serviceIntent)
+}
+
 
 fun openAppSettings(context: Context) {
     val intent = Intent(
