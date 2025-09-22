@@ -52,7 +52,7 @@ class GuitarTuner : Service() {
     }
 
     private fun stopTuner() {
-        Log.d("test", "TUNER STOPPING")
+//        Log.d("test", "TUNER STOPPING")
         audioProcessor?.stop()
         audioProcessor = null
         glyphSprite?.unInit()
@@ -65,8 +65,7 @@ class GuitarTuner : Service() {
         backgroundScope?.launch {
             while (isActive) {
                 val currentFreq = audioProcessor!!.getCurrentPitch()
-
-                Log.d("", currentFreq.toString())
+//                Log.d("", currentFreq.toString())
 
                 val targetNote = when (tuningMode) {
                     TuningMode.AUTO -> audioProcessor!!.getClosestNote()

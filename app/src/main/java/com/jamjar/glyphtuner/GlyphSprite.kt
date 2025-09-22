@@ -21,8 +21,7 @@ class GlyphSprite {
 
         val callback = object : GlyphMatrixManager.Callback {
             override fun onServiceConnected(componentName: ComponentName) {
-                Log.d("GlyphToy", "Glyph service connected")
-                // safe to register and set frame now
+//                Log.d("GlyphToy", "Glyph service connected")
                 glyphMatrixManager?.register(Glyph.DEVICE_23112)
             }
 

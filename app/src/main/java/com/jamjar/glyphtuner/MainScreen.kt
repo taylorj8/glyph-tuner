@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +45,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 fun MainScreen() {
     val context = LocalContext.current
     var showSettingsLink by remember { mutableStateOf(false) }
+    var showLicenseDialog by remember { mutableStateOf(false) }
 
     val permissionsToRequest = listOf(
         Manifest.permission.RECORD_AUDIO,
@@ -158,6 +161,32 @@ fun MainScreen() {
                     modifier = Modifier.fillMaxWidth(0.4f)
                 )
                 Spacer(modifier = Modifier.height(28.dp))
+                // License Button
+                Button(
+                    onClick = { showLicenseDialog = true },
+                ) {
+                    Text("License Info")
+                }
+            }
+            // License Dialog
+            if (showLicenseDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLicenseDialog = false },
+                    title = { Text("GPLv3 License") },
+                    text = {
+                        Text(
+                            "This app uses the TarsosDSP library licensed under the GNU General Public License v3 (GPLv3).\n\n" +
+                                    "Copyright (C) 2010-2023 Joren Six\n\n" +
+                                    "Full source code of this app is available at: https://github.com/taylorj8/glyph-tuner\n\n" +
+                                    "This program is distributed WITHOUT ANY WARRANTY; see https://www.gnu.org/licenses/gpl-3.0.html for details."
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showLicenseDialog = false }) {
+                            Text("Close")
+                        }
+                    }
+                )
             }
         }
     }
