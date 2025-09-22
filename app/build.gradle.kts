@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.jamjar.glyphsuite"
+    namespace = "com.jamjar.glyphtuner"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.jamjar.glyphsuite"
+        applicationId = "com.jamjar.glyphtuner"
         minSdk = 34
         targetSdk = 35
         versionCode = 1

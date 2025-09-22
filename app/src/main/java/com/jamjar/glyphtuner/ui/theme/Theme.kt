@@ -1,6 +1,5 @@
-package com.jamjar.glyphsuite.ui.theme
+package com.jamjar.glyphtuner.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -15,7 +14,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.jamjar.glyphsuite.R
+import com.jamjar.glyphtuner.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -40,7 +39,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun GlyphSuiteTheme(
+fun GlyphTunerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

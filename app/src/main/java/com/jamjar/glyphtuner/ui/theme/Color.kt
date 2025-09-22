@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite.ui.theme
+package com.jamjar.glyphtuner.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

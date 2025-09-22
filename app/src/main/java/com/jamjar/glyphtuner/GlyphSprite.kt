@@ -2,8 +2,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.jamjar.glyphsuite.R
-import com.jamjar.glyphsuite.util.TuningMode
+import com.jamjar.glyphtuner.R
+import com.jamjar.glyphtuner.util.TuningMode
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager

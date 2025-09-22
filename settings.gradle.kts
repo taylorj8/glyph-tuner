@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Glyph Suite"
+rootProject.name = "Glyph Tuner"
 include(":app")
  

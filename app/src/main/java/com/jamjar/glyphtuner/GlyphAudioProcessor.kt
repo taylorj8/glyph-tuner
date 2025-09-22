@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite
+package com.jamjar.glyphtuner
 
 import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.AudioEvent

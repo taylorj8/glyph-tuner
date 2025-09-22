@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite
+package com.jamjar.glyphtuner
 
 import android.Manifest
 import android.content.Context

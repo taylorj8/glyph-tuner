@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite
+package com.jamjar.glyphtuner
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

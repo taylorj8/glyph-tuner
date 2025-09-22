@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite.util
+package com.jamjar.glyphtuner.util
 
 enum class TuningMode(val hz: Float?) {
     AUTO(null), LOW_E(82.41f), A(110f), D(146.83f), G(196f), B(246.94f), HIGH_E(329.63f);

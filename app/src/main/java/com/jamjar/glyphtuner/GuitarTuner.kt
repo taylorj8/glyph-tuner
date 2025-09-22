@@ -1,4 +1,4 @@
-package com.jamjar.glyphsuite
+package com.jamjar.glyphtuner
 
 import GlyphSprite
 import android.app.Service
@@ -10,7 +10,7 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
-import com.jamjar.glyphsuite.util.TuningMode
+import com.jamjar.glyphtuner.util.TuningMode
 import com.nothing.ketchum.GlyphToy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

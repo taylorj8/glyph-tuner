@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Glyph Suite</string>
+    <string name="app_name">Glyph Tuner</string>
     <string name="toy_name">Guitar Tuner</string>
     <string name="tuner_desc">A simple guitar tuner for the Glyph Matrix.</string>
 </resources>
