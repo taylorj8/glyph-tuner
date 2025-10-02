@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startForegroundService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import androidx.core.net.toUri
 
 @Preview
 @OptIn(ExperimentalPermissionsApi::class)
@@ -158,14 +160,26 @@ fun MainScreen() {
                 Image(
                     painter = painterResource(id = R.drawable.guitar_tuner_icon),
                     contentDescription = "Guitar Tuner Icon",
-                    modifier = Modifier.fillMaxWidth(0.4f)
+                    modifier = Modifier.fillMaxWidth(0.48f)
                 )
-                Spacer(modifier = Modifier.height(28.dp))
-                // License Button
-                Button(
-                    onClick = { showLicenseDialog = true },
+                Spacer(modifier = Modifier.height(48.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Text("License Info")
+                    Button(
+                        onClick = { showLicenseDialog = true },
+                    ) {
+                        Text("License Info")
+                    }
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, "https://buymeacoffee.com/jamjar137".toUri())
+                            context.startActivity(intent)
+                        },
+                    ) {
+                        Text("Support me")
+                    }
                 }
             }
             // License Dialog
